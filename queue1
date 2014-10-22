@@ -1,0 +1,63 @@
+
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.qmsk.business.msgtask.common.bean.MsgMailBean;
+import com.qmsk.business.msgtask.common.bean.MsgMpBean;
+
+public class MsgSendPoolQueue {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(MsgSendPoolQueue.class);
+
+	private static Queue<MsgMailBean> queue_email = new ConcurrentLinkedQueue<MsgMailBean>();
+	private static Queue<MsgMpBean> queue_mp = new ConcurrentLinkedQueue<MsgMpBean>();
+
+	public static void putPool_mp(MsgMpBean info) {
+		if (queue_mp.offer(info)) {// 同add，但不抛异常
+			logger.info("add new MsgMpBean to queue - success.");
+		} else {
+			logger.info("add new MsgMpBean to queue - failed.");
+		}
+	}
+
+	public static void putPool_email(MsgMailBean info) {
+		if (queue_email.offer(info)) {// 同add，但不抛异常
+			logger.info("add new MsgMailBean to queue - success.");
+		} else {
+			logger.info("add new MsgMailBean to queue - failed.");
+		}
+	}
+
+	public static MsgMpBean getFirstAndRemove_mp() {
+		logger.info("get/remove MsgMpBean task from queue head.");
+		synchronized (queue_mp) {
+			if (!queue_mp.isEmpty()) {
+				return queue_mp.poll();
+			}
+		}
+		return null;
+	}
+
+	public static MsgMailBean getFirstAndRemove_email() {
+		logger.info("get/remove MsgMailBean task from queue head.");
+		synchronized (queue_email) {
+			if (!queue_email.isEmpty()) {
+				return queue_email.poll();
+			}
+		}
+		return null;
+	}
+
+	public static boolean isEmpty_email() {
+		return queue_email.isEmpty();
+	}
+
+	public static boolean isEmpty_mp() {
+		return queue_mp.isEmpty();
+	}
+
+}
